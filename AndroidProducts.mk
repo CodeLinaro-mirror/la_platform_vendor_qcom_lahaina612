@@ -1,5 +1,5 @@
 PRODUCT_MAKEFILES := \
-   $(LOCAL_DIR)/lahaina.mk
+   $(LOCAL_DIR)/lahaina612.mk
 
 COMMON_LUNCH_CHOICES := \
-        lahaina-userdebug
+        lahaina612-userdebug

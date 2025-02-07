@@ -4,7 +4,8 @@
 #
 # TODO(b/124534788): Temporarily allow eng and debug LOCAL_MODULE_TAGS
 
-BOARD_SYSTEMSDK_VERSIONS := 30
+BUILD_BROKEN_MISSING_REQUIRED_MODULES  := true
+ALLOW_MISSING_DEPENDENCIES := true
 
 TARGET_ARCH := arm64
 TARGET_ARCH_VARIANT := armv8-a
@@ -12,22 +13,30 @@ TARGET_CPU_ABI := arm64-v8a
 TARGET_CPU_ABI2 :=
 TARGET_CPU_VARIANT := kryo300
 
-TARGET_2ND_ARCH := arm
-TARGET_2ND_ARCH_VARIANT := armv8-2a
-TARGET_2ND_CPU_ABI := armeabi-v7a
-TARGET_2ND_CPU_ABI2 := armeabi
-TARGET_2ND_CPU_VARIANT := cortex-a75
-
 TARGET_NO_BOOTLOADER := false
 TARGET_USES_UEFI := true
+TARGET_USES_REMOTEPROC := true
 TARGET_NO_KERNEL := false
+TARGET_SIGNONLY_BOOTLOADER := true
+
+ifeq ($(TARGET_NO_KERNEL), true)
+BOARD_PREBUILT_BOOTIMAGE := device/qcom/lahaina612/boot.img
+BOOT_OS_VERSION = $(PLATFORM_VERSION_LAST_STABLE)
+BOOT_SECURITY_PATCH = $(PLATFORM_SECURITY_PATCH)
+endif
+
+BOARD_RAMDISK_USE_LZ4 := true
 
 -include $(QCPATH)/common/lahaina/BoardConfigVendor.mk
 
 USE_OPENGL_RENDERER := true
+USESECTOOLV2 := true
 
-#Generate DTBO image
-BOARD_KERNEL_SEPARATED_DTBO := true
+SECTOOLS_SECURITY_PROFILE := $(QCPATH)/securemsm/security_profiles/kodiak_security_profile.xml
+
+# TODO: Enable it back when we have a path forward
+# Disable generation of dtbo.img
+BOARD_KERNEL_SEPARATED_DTBO := false
 
 ### Dynamic partition Handling
 # Define the Dynamic Partition sizes and groups.
@@ -46,22 +55,27 @@ ifeq ($(BOARD_KERNEL_SEPARATED_DTBO),true)
 endif
 BOARD_SUPER_PARTITION_GROUPS := qti_dynamic_partitions
 BOARD_QTI_DYNAMIC_PARTITIONS_SIZE := 6438256640
-BOARD_QTI_DYNAMIC_PARTITIONS_PARTITION_LIST := vendor odm
+BOARD_QTI_DYNAMIC_PARTITIONS_PARTITION_LIST := vendor vendor_dlkm system_dlkm odm
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x06400000
 
 TARGET_COPY_OUT_ODM := odm
 BOARD_ODMIMAGE_FILE_SYSTEM_TYPE := ext4
 ifeq ($(ENABLE_AB), true)
-AB_OTA_PARTITIONS ?= boot vendor_boot vendor odm dtbo vbmeta
+ifeq ($(BOARD_AVB_ENABLE),true)
+AB_OTA_PARTITIONS ?= boot init_boot vendor_boot recovery vendor vendor_dlkm system_dlkm odm dtbo vbmeta
+else
+AB_OTA_PARTITIONS ?= boot init_boot vendor_boot recovery vendor vendor_dlkm system_dlkm odm dtbo
+endif
 endif
 BOARD_EXT4_SHARE_DUP_BLOCKS := true
 
 ifeq ($(ENABLE_AB), true)
+TARGET_NO_RECOVERY := true
 # Defines for enabling A/B builds
 AB_OTA_UPDATER := true
-TARGET_RECOVERY_FSTAB := device/qcom/lahaina/recovery.fstab
+TARGET_RECOVERY_FSTAB := device/qcom/lahaina612/recovery.fstab
 else
-TARGET_RECOVERY_FSTAB := device/qcom/lahaina/recovery_non_AB.fstab
+TARGET_RECOVERY_FSTAB := device/qcom/lahaina612/recovery_non_AB.fstab
 BOARD_CACHEIMAGE_PARTITION_SIZE := 268435456
 BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
 endif
@@ -73,9 +87,6 @@ ifeq ($(BOARD_AVB_ENABLE), true)
     BOARD_AVB_RECOVERY_ROLLBACK_INDEX_LOCATION := 1
 endif
 
-
-BOARD_USES_METADATA_PARTITION := true
-
 #Enable compilation of oem-extensions to recovery
 #These need to be explicitly
 ifneq ($(AB_OTA_UPDATER),true)
@@ -85,128 +96,81 @@ endif
 TARGET_COPY_OUT_VENDOR := vendor
 BOARD_PROPERTY_OVERRIDES_SPLIT_ENABLED := true
 
+BOARD_USES_VENDOR_DLKMIMAGE := true
+TARGET_COPY_OUT_VENDOR_DLKM := vendor_dlkm
+BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
+
+# Enable compilation of system_dlkm image
+BOARD_USES_SYSTEM_DLKMIMAGE := true
+TARGET_COPY_OUT_SYSTEM_DLKM := system_dlkm
+BOARD_SYSTEM_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
+
+BOARD_USES_METADATA_PARTITION := true
+BOARD_METADATAIMAGE_FILE_SYSTEM_TYPE := f2fs
+BOARD_METADATAIMAGE_PARTITION_SIZE := 67108864
+
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
 BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
 BOARD_BOOTIMAGE_PARTITION_SIZE := 0x06000000
 BOARD_KERNEL-GKI_BOOTIMAGE_PARTITION_SIZE := $(BOARD_BOOTIMAGE_PARTITION_SIZE)
+BOARD_INIT_BOOT_IMAGE_PARTITION_SIZE := 0x00800000
 BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 0x06000000
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 48318382080
 BOARD_PERSISTIMAGE_PARTITION_SIZE := 33554432
 BOARD_PERSISTIMAGE_FILE_SYSTEM_TYPE := ext4
-BOARD_METADATAIMAGE_PARTITION_SIZE := 16777216
 BOARD_DTBOIMG_PARTITION_SIZE := 0x0800000
 BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_FLASH_BLOCK_SIZE := 131072 # (BOARD_KERNEL_PAGESIZE * 64)
 
-#BOARD_VENDOR_KERNEL_MODULES := \
-#    $(KERNEL_MODULES_OUT)/audio_apr.ko \
-#    $(KERNEL_MODULES_OUT)/audio_q6_pdr.ko \
-#    $(KERNEL_MODULES_OUT)/audio_q6_notifier.ko \
-#    $(KERNEL_MODULES_OUT)/audio_adsp_loader.ko \
-#    $(KERNEL_MODULES_OUT)/audio_q6.ko \
-#    $(KERNEL_MODULES_OUT)/audio_usf.ko \
-#    $(KERNEL_MODULES_OUT)/audio_pinctrl_wcd.ko \
-#    $(KERNEL_MODULES_OUT)/audio_pinctrl_lpi.ko \
-#    $(KERNEL_MODULES_OUT)/audio_swr.ko \
-#    $(KERNEL_MODULES_OUT)/audio_wcd_core.ko \
-#    $(KERNEL_MODULES_OUT)/audio_swr_ctrl.ko \
-#    $(KERNEL_MODULES_OUT)/audio_wsa881x.ko \
-#    $(KERNEL_MODULES_OUT)/audio_platform.ko \
-#    $(KERNEL_MODULES_OUT)/audio_hdmi.ko \
-#    $(KERNEL_MODULES_OUT)/audio_stub.ko \
-#    $(KERNEL_MODULES_OUT)/audio_wcd9xxx.ko \
-#    $(KERNEL_MODULES_OUT)/audio_mbhc.ko \
-#    $(KERNEL_MODULES_OUT)/audio_wcd938x.ko \
-#    $(KERNEL_MODULES_OUT)/audio_wcd938x_slave.ko \
-#    $(KERNEL_MODULES_OUT)/audio_bolero_cdc.ko \
-#    $(KERNEL_MODULES_OUT)/audio_wsa_macro.ko \
-#    $(KERNEL_MODULES_OUT)/audio_va_macro.ko \
-#    $(KERNEL_MODULES_OUT)/audio_rx_macro.ko \
-#    $(KERNEL_MODULES_OUT)/audio_tx_macro.ko \
-#    $(KERNEL_MODULES_OUT)/audio_native.ko \
-#    $(KERNEL_MODULES_OUT)/audio_machine_lahaina.ko \
-#    $(KERNEL_MODULES_OUT)/audio_snd_event.ko \
-#    $(KERNEL_MODULES_OUT)/qca_cld3_wlan.ko \
-#    $(KERNEL_MODULES_OUT)/wil6210.ko \
-#    $(KERNEL_MODULES_OUT)/msm_11ad_proxy.ko \
-#    $(KERNEL_MODULES_OUT)/br_netfilter.ko \
-#    $(KERNEL_MODULES_OUT)/gspca_main.ko \
-#    $(KERNEL_MODULES_OUT)/lcd.ko \
-#    $(KERNEL_MODULES_OUT)/llcc_perfmon.ko \
+# Use sha256 hash algorithm for system_dlkm partition
+BOARD_AVB_SYSTEM_DLKM_ADD_HASHTREE_FOOTER_ARGS += --hash_algorithm sha256
+BOARD_AVB_VENDOR_ADD_HASHTREE_FOOTER_ARGS += --hash_algorithm sha256
+BOARD_AVB_VENDOR_DLKM_ADD_HASHTREE_FOOTER_ARGS += --hash_algorithm sha256
+BOARD_AVB_ODM_ADD_HASHTREE_FOOTER_ARGS += --hash_algorithm sha256
 
-# check for for userdebug and eng build variants and install the appropriate modules
-#ifneq (,$(filter userdebug eng, $(TARGET_BUILD_VARIANT)))
-#ifeq (,$(findstring perf_defconfig, $(KERNEL_DEFCONFIG)))
-#BOARD_VENDOR_KERNEL_MODULES += $(KERNEL_MODULES_OUT)/atomic64_test.ko
-#BOARD_VENDOR_KERNEL_MODULES += $(KERNEL_MODULES_OUT)/lkdtm.ko
-#BOARD_VENDOR_KERNEL_MODULES += $(KERNEL_MODULES_OUT)/locktorture.ko
-#BOARD_VENDOR_KERNEL_MODULES += $(KERNEL_MODULES_OUT)/rcutorture.ko
-#BOARD_VENDOR_KERNEL_MODULES += $(KERNEL_MODULES_OUT)/test_user_copy.ko
-#BOARD_VENDOR_KERNEL_MODULES += $(KERNEL_MODULES_OUT)/torture.ko
-#endif
-#endif
+# Enable chained vbmeta for boot images
+BOARD_AVB_BOOT_KEY_PATH := external/avb/test/data/testkey_rsa4096.pem
+BOARD_AVB_BOOT_ALGORITHM := SHA256_RSA4096
+BOARD_AVB_BOOT_ROLLBACK_INDEX := $(PLATFORM_SECURITY_PATCH_TIMESTAMP)
+BOARD_AVB_BOOT_ROLLBACK_INDEX_LOCATION := 3
 
-
-ifeq "$(KERNEL_DEFCONFIG)" "vendor/$(TARGET_BOARD_PLATFORM)-qgki_defconfig"
-BOARD_KERNEL_BINARIES := kernel kernel-gki
-endif
-
-ifeq (,$(findstring -qgki-debug_defconfig,$(KERNEL_DEFCONFIG)))
-$(warning #### GKI config ####)
-VENDOR_RAMDISK_KERNEL_MODULES := proxy-consumer.ko \
-				rpmh-regulator.ko \
-				refgen.ko \
-				stub-regulator.ko \
-                                clk-dummy.ko \
-				clk-qcom.ko \
-				clk-rpmh.ko \
-				gcc-lahaina.ko \
-				gcc-shima.ko \
-				qnoc-qos.ko \
-				qnoc-lahaina.ko \
-				qnoc-shima.ko \
-				cmd-db.ko \
-				qcom_rpmh.ko \
-				rpmhpd.ko \
-				icc-bcm-voter.ko \
-				icc-rpmh.ko \
-				pinctrl-msm.ko \
-				pinctrl-lahaina.ko \
-				pinctrl-shima.ko \
-				_qcom_scm.ko \
-				secure_buffer.ko \
-				iommu-logger.ko \
-				qcom-arm-smmu-mod.ko \
-				phy-qcom-ufs.ko \
-				phy-qcom-ufs-qrbtc-sdm845.ko \
-				phy-qcom-ufs-qmp-v4-lahaina.ko\
-				ufshcd-crypto-qti.ko \
-				crypto-qti-common.ko \
-				crypto-qti-hwkm.ko \
-				hwkm.ko \
-				ufs-qcom.ko \
-				qbt_handler.ko \
-				qcom_watchdog.ko \
-				qcom-pdc.ko \
-				qpnp-power-on.ko \
-				msm-poweroff.ko \
-				memory_dump_v2.ko
-else
-$(warning #### QGKI config ####)
-endif
-
-BOARD_DO_NOT_STRIP_VENDOR_MODULES := true
 TARGET_USES_ION := true
-TARGET_USES_NEW_ION_API :=true
+TARGET_USES_NEW_ION_API := true
+TARGET_USES_SMMU_PROXY := true
 
-BOARD_KERNEL_CMDLINE := console=ttyMSM0,115200n8 androidboot.hardware=qcom androidboot.console=ttyMSM0 androidboot.memcg=1 lpm_levels.sleep_disabled=1 video=vfb:640x400,bpp=32,memsize=3072000 msm_rtb.filter=0x237 service_locator.enable=1 androidboot.usbcontroller=a600000.dwc3 swiotlb=0 loop.max_part=7 cgroup.memory=nokmem,nosocket pcie_ports=compat loop.max_part=7
+BOARD_KERNEL_CMDLINE := video=vfb:640x400,bpp=32,memsize=3072000
+BOARD_BOOTCONFIG := androidboot.hardware=qcom androidboot.memcg=1 androidboot.usbcontroller=a600000.dwc3
+
+# TARGET_CONSOLE_ENABLED allows to override the default kernel configuration
+# true  -- override kernel configuration to enable console
+# false -- override kernel configuration to disable console
+# <blank> (default) -- use kernel default configuration
+ifeq ($(TARGET_CONSOLE_ENABLED),true)
+BOARD_KERNEL_CMDLINE += console=ttyMSM0,115200n8 earlycon qcom_geni_serial.con_enabled=1
+BOARD_BOOTCONFIG += androidboot.console=ttyMSM0
+else
+ifeq ($(TARGET_CONSOLE_ENABLED),false)
+BOARD_KERNEL_CMDLINE += qcom_geni_serial.con_enabled=0
+endif
+endif
+
+#Enabling Protected VM for AVF
+BOARD_BOOTCONFIG += androidboot.hypervisor.protected_vm.supported=true
+
+BOARD_KERNEL_CMDLINE += $(file < device/qcom/$(TARGET_BOARD_PLATFORM)-kernel/extra_cmdline)
+BOARD_BOOTCONFIG += $(file < device/qcom/$(TARGET_BOARD_PLATFORM)-kernel/extra_bootconfig)
+
+ifneq ($(findstring kasan,$(file < device/qcom/$(TARGET_BOARD_PLATFORM)-kernel/build_opts.txt)),)
+BOARD_KERNEL_CMDLINE += panic_on_taint=0x0 kasan_multi_shot stack_depot_disable=off page_owner=on
+endif
 
 BOARD_KERNEL_BASE        := 0x00000000
 BOARD_KERNEL_PAGESIZE    := 4096
 BOARD_KERNEL_TAGS_OFFSET := 0x01E00000
 BOARD_RAMDISK_OFFSET     := 0x02000000
+
 
 TARGET_KERNEL_ARCH := arm64
 TARGET_KERNEL_HEADER_ARCH := arm64
@@ -225,16 +189,20 @@ TARGET_INIT_VENDOR_LIB := libinit_msm
 
 #Disable appended dtb.
 TARGET_KERNEL_APPEND_DTB := false
-TARGET_COMPILE_WITH_MSM_KERNEL := true
+# Compile without full kernel source
+TARGET_COMPILE_WITH_MSM_KERNEL := false
 
 #Enable dtb in boot image and boot image header version 3 support.
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
-ifeq ($(ENABLE_AB), true)
-BOARD_USES_RECOVERY_AS_BOOT := true
-TARGET_NO_RECOVERY := true
-endif
-BOARD_BOOT_HEADER_VERSION := 3
+BOARD_BOOT_HEADER_VERSION := 4
 BOARD_MKBOOTIMG_ARGS := --header_version $(BOARD_BOOT_HEADER_VERSION)
+
+# Specify init boot header version
+BOARD_INIT_BOOT_HEADER_VERSION := 4
+BOARD_MKBOOTIMG_INIT_ARGS += --header_version $(BOARD_INIT_BOOT_HEADER_VERSION)
+
+BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE := true
+BOARD_MOVE_GSI_AVB_KEYS_TO_VENDOR_BOOT := true
 
 #Enable PD locater/notifier
 TARGET_PD_SERVICE_ENABLED := true
@@ -300,7 +268,6 @@ endif
 #################################################################################
 
 BUILD_BROKEN_DUP_RULES := true
-BUILD_BROKEN_NINJA_USES_ENV_VARS := TEMPORARY_DISABLE_PATH_RESTRICTIONS
 BUILD_BROKEN_NINJA_USES_ENV_VARS += RTIC_MPGEN
 
 # KEYSTONE(If43215c7f384f24e7adeeabdbbb1790f174b2ec1,b/147756744)
@@ -309,6 +276,5 @@ BUILD_BROKEN_NINJA_USES_ENV_VARS += SDCLANG_AE_CONFIG SDCLANG_CONFIG SDCLANG_SA_
 BUILD_BROKEN_USES_BUILD_HOST_SHARED_LIBRARY := true
 BUILD_BROKEN_USES_BUILD_HOST_STATIC_LIBRARY := true
 BUILD_BROKEN_USES_BUILD_HOST_EXECUTABLE := true
-BUILD_BROKEN_USES_BUILD_COPY_HEADERS := true
 
 include device/qcom/sepolicy_vndr/SEPolicy.mk
