@@ -110,8 +110,8 @@ TARGET_USES_QMAA_RECOMMENDED_BOOT_CONFIG := true
 #QMAA tech team flag to override global QMAA per tech team
 #true means overriding global QMAA for this tech area
 #false means using global, no override
-TARGET_USES_QMAA_OVERRIDE_RPMB := false
-TARGET_USES_QMAA_OVERRIDE_GPT  := false
+TARGET_USES_QMAA_OVERRIDE_RPMB := true
+TARGET_USES_QMAA_OVERRIDE_GPT  := true
 TARGET_USES_QMAA_OVERRIDE_DISPLAY := true
 TARGET_USES_QMAA_OVERRIDE_AUDIO   := false
 TARGET_USES_QMAA_OVERRIDE_VIDEO   := false
