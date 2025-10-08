@@ -579,12 +579,6 @@ PRODUCT_VENDOR_PROPERTIES += \
 # Enable support for APEX updates
 $(call inherit-product, $(SRC_TARGET_DIR)/product/updatable_apex.mk)
 
-ifneq ($(TARGET_USES_QMAA), true)
-ifeq ($(TARGET_USES_QMAA_OVERRIDE_ANDROID_CORE),true)
-#enable virtualization service
-$(call inherit-product, packages/modules/Virtualization/apex/product_packages.mk)
-endif
-endif
 
 ###################################################################################
 # This is the End of target.mk file.
