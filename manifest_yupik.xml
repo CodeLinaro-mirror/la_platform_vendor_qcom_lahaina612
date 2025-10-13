@@ -58,13 +58,4 @@ SPDX-License-Identifier: BSD-3-Clause-Clear
             <instance>default</instance>
         </interface>
     </hal>
-    <!-- SPU service-->
-    <hal format="aidl" optional="true">
-        <name>vendor.qti.hardware.spu</name>
-        <version>1</version>
-        <interface>
-            <name>ISPUManager</name>
-            <instance>default</instance>
-        </interface>
-    </hal>
 </manifest>
