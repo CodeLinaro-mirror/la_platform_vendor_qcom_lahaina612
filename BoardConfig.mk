@@ -30,9 +30,6 @@ BOARD_RAMDISK_USE_LZ4 := true
 -include $(QCPATH)/common/lahaina/BoardConfigVendor.mk
 
 USE_OPENGL_RENDERER := true
-USESECTOOLV2 := true
-
-SECTOOLS_SECURITY_PROFILE := $(QCPATH)/securemsm/security_profiles/kodiak_security_profile.xml
 
 # TODO: Enable it back when we have a path forward
 # Disable generation of dtbo.img
