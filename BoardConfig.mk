@@ -140,7 +140,7 @@ TARGET_USES_ION := true
 TARGET_USES_NEW_ION_API := true
 TARGET_USES_SMMU_PROXY := true
 
-BOARD_KERNEL_CMDLINE := video=vfb:640x400,bpp=32,memsize=3072000
+BOARD_KERNEL_CMDLINE := video=vfb:640x400,bpp=32,memsize=3072000 loop.max_part=7
 BOARD_BOOTCONFIG := androidboot.hardware=qcom androidboot.memcg=1 androidboot.usbcontroller=a600000.dwc3 androidboot.load_modules_parallel=true
 
 # TARGET_CONSOLE_ENABLED allows to override the default kernel configuration
