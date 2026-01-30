@@ -23,8 +23,8 @@ else
 TARGET_EMMC_BOOTLOADER := $(TARGET_BOARD_UNSIGNED_ABL_DIR)/unsigned_abl.elf
 SIGN_ABL := $(PRODUCT_OUT)/abl.elf
 
-SECIMAGE_BASE := vendor/qcom/proprietary/sectools
-SECTOOLS_SECURITY_PROFILE := $(SECIMAGE_BASE)/config/integration/secimagev3.xml
+SECIMAGE_BASE := $(QCPATH)/sectools
+SECTOOLS_SECURITY_PROFILE := $(SECIMAGE_BASE)/config/integration/secimage_eccv3.xml
 SIGN_ID := abl
 INSTALL_FILE_NAME := abl.elf
 

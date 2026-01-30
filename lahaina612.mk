@@ -180,8 +180,6 @@ endif
 #Suppot to compile recovery without msm headers
 TARGET_HAS_GENERIC_KERNEL_HEADERS := true
 
-CLEAN_UP_JAVA_IN_VENDOR ?= enforcing
-
 JAVA_IN_VENDOR_SOONG_WHITE_LIST :=\
 CuttlefishService\
 pasrservice\
@@ -227,6 +225,7 @@ TARGET_KERNEL_DLKM_DATAIPA_OVERRIDE := true
 TARGET_KERNEL_DLKM_FASTRPC_OVERRIDE := true
 TARGET_KERNEL_DLKM_EVA_OVERRIDE := false
 TARGET_KERNEL_DLKM_SPU_OVERRIDE := false
+TARGET_KERNEL_DLKM_SAT_MODULE_OVERRIDE := true
 
 #####Dynamic partition Handling
 ###
