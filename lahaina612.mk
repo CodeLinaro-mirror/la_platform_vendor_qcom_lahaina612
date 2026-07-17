@@ -595,3 +595,4 @@ $(foreach vdefs, $(sort $(wildcard vendor/qcom/defs/product-defs/vendor/*.mk)), 
     $(call inherit-product, $(vdefs)))
 ###################################################################################
 
+RO_USB_UVC_ENABLED := false
