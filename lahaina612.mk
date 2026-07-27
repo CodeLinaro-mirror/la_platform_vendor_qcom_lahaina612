@@ -227,6 +227,12 @@ TARGET_KERNEL_DLKM_EVA_OVERRIDE := false
 TARGET_KERNEL_DLKM_SPU_OVERRIDE := false
 TARGET_KERNEL_DLKM_SAT_MODULE_OVERRIDE := true
 
+# RB3 Gen2 VideoCollab/Core Kits have no NFC controller. init selects this
+# unavailable-feature policy using SoC, hw_platform and platform subtype.
+PRODUCT_COPY_FILES += \
+    device/qcom/lahaina612/nfc/nfc-soc-config.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/nfc-soc-config.xml \
+    device/qcom/lahaina612/nfc/nfc-unavailable-features.xml:$(TARGET_COPY_OUT_VENDOR)/etc/nfc/nfc-unavailable-features.xml
+
 #####Dynamic partition Handling
 ###
 #### Turning this flag to TRUE will enable dynamic partition/super image creation.

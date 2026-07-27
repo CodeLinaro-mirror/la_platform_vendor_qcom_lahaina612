@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+    SPDX-License-Identifier: BSD-3-Clause-Clear
+-->
+
+<permissions>
+    <unavailable-feature name="android.hardware.nfc"/>
+    <unavailable-feature name="android.hardware.nfc.any"/>
+    <unavailable-feature name="android.hardware.nfc.ese"/>
+    <unavailable-feature name="android.hardware.nfc.hce"/>
+    <unavailable-feature name="android.hardware.nfc.hcef"/>
+    <unavailable-feature name="android.hardware.nfc.uicc"/>
+    <unavailable-feature name="com.nxp.mifare"/>
+</permissions>
