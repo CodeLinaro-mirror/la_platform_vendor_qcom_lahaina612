@@ -431,9 +431,7 @@ else
 TARGET_USES_QCV := true
 endif
 
-DEVICE_MANIFEST_SKUS := lahaina shima yupik
-DEVICE_MANIFEST_LAHAINA_FILES := device/qcom/lahaina612/manifest_lahaina.xml
-DEVICE_MANIFEST_SHIMA_FILES := device/qcom/lahaina612/manifest_shima.xml
+DEVICE_MANIFEST_SKUS := yupik
 DEVICE_MANIFEST_YUPIK_FILES := device/qcom/lahaina612/manifest_yupik.xml
 
 DEVICE_MATRIX_FILE   := device/qcom/common/compatibility_matrix.xml
@@ -574,6 +572,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # VM shutdown feature enablement
 PRODUCT_VENDOR_PROPERTIES += \
      ro.vendor.vm.ssr.enable=false
+
+PRODUCT_CHECK_PREBUILT_MAX_PAGE_SIZE := false
 
 # Enable support for APEX updates
 $(call inherit-product, $(SRC_TARGET_DIR)/product/updatable_apex.mk)
