@@ -573,6 +573,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_VENDOR_PROPERTIES += \
      ro.vendor.vm.ssr.enable=false
 
+PRODUCT_CHECK_PREBUILT_MAX_PAGE_SIZE := false
+
 # Enable support for APEX updates
 $(call inherit-product, $(SRC_TARGET_DIR)/product/updatable_apex.mk)
 
